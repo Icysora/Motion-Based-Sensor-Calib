@@ -5,7 +5,7 @@ import folium
 import os
 
 print("loading data ...")
-data_ori = np.loadtxt("rtk1118_1.txt",dtype=np.float64,comments='//',usecols=(9,10,12,13))
+data_ori = np.loadtxt("txt/rtk1118_1.txt",dtype=np.float64,comments='//',usecols=(9,10,12,13))
 
 N = data_ori.shape[0]
 print("size:",N)

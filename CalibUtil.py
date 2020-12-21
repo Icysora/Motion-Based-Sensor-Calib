@@ -3,13 +3,12 @@ import numpy as np
 from scipy.spatial.transform import Rotation as Rot 
 from scipy.optimize import minimize
 
-def SolveR(RA, RB, max_size=2000, log=True, name="RX"):
-
+def SolveRGroup(RA, RB):
     """
     Solve RA * RX = RX * RB
+    return RX's rotvec
     """
-
-    n = min(RA.shape[2],max_size)
+    n = RA.shape[2]
     M = np.zeros((9*n,9),dtype=np.float64)
 
     for k in range(n):
@@ -22,18 +21,41 @@ def SolveR(RA, RB, max_size=2000, log=True, name="RX"):
     if np.linalg.det(RX) < 0:
         RX = -RX
 
-    angleX = Rot.from_matrix(RX).as_euler('zyx',degrees=True)
+    return Rot.from_matrix(RX).as_rotvec()
+
+def SolveR(RA, RB, group_size=1000, log=True, name="R"):
+
+    if RA.shape[2] < group_size:
+        print("Must have",group_size,"data to calculate RX")
+        return np.eye(3)
+
+    vx = np.zeros(3)
+    mx = int(RA.shape[2]/group_size)
+
+    if log:
+        print("\n----------------------------------------\n")
+        print("Start Calculate RX ...")
+
+    for k in range(mx):
+        vx = vx + SolveRGroup(RA[:,:,k*group_size:k*group_size+group_size],
+                              RB[:,:,k*group_size:k*group_size+group_size]) / mx
+        if log:
+            print(k+1,"/",mx)
+
+    RotX = Rot.from_rotvec(vx)
+    RX = RotX.as_matrix()
+    AX = RotX.as_euler('zyx',degrees=True)
 
     if(log):
         
         print("\n----------------------------------------\n")
-        print(name,"->")
+        print(name,"Result ->")
         print(RX)
-        print("\nangle (zyx) (May not correct) ->")
-        print(angleX)
+        print("\nEuler Angle (zyx) ->")
+        print(AX)
         print("\n----------------------------------------\n")
 
-    return RX, angleX
+    return RX    
 
 def SolveT(RA, RB, TA, TB, RX, scale=1, ignore_z=False, log=True):
 
@@ -151,7 +173,6 @@ def SolveRNCost(x, Rin):
     # print(Cost)       
 
     return Cost
-
 
 def SolveRN(Rin, use_opt=False):
 

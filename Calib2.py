@@ -4,8 +4,8 @@ import CalibDataProcessor
 import CalibUtil
 import matplotlib.pyplot as plt
 
-odom1 = CalibDataProcessor.ReadDataFromFile('txt/1216-2-VLodom.txt',file_type='ROS',time_stamp='delta')
-odom2 = CalibDataProcessor.ReadDataFromFile('txt/1216-2-RSodom.txt',file_type='ROS',time_stamp='delta')
+odom1 = CalibDataProcessor.ReadDataFromFile('txt/00-1216-VLodom.txt',file_type='ORB',time_stamp='real')
+odom2 = CalibDataProcessor.ReadDataFromFile('txt/00-1216-RSodom.txt',file_type='ORB',time_stamp='real')
 
 # fig = plt.figure()
 # ax = fig.gca(projection='3d')
@@ -15,7 +15,7 @@ odom2 = CalibDataProcessor.ReadDataFromFile('txt/1216-2-RSodom.txt',file_type='R
 
 odom1s, odom2s = CalibDataProcessor.TimestampMatch(odom1, odom2, time_th=0.05)
 R1A, R1B, T1A, T1B = CalibDataProcessor.PrepareAB(odom1s, odom2s, r_th=1.4, t_th=0.1, log=False)
-RX, AX = CalibUtil.SolveR(R1A,R1B,name="R")
+RX = CalibUtil.SolveR(R1A,R1B,group_size=800,name="R")
 
 
 TX = CalibUtil.SolveT(R1A, R1B, T1A, T1B, RX, ignore_z=False)
