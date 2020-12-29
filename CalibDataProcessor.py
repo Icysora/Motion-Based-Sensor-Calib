@@ -73,7 +73,9 @@ def TimestampMatch(odom1, odom2, time_th=0.05, log='[TsMatch]'):
 
     return odom1s[1:,:], odom2s[1:,:]
 
-def PrepareAB(odom1, odom2, index_start=0, index_end=0, index_delta=(20,30,40,50,70,100,130,160,200,240), index_step=1, r_th=1.2, t_th=0.3, log='[GetAB]'):
+def PrepareAB(odom1, odom2, index_start=0, index_end=0, 
+              index_delta=(20,30,40,50,70,100,130,160,200,240), index_step=1, 
+              r_th=1.2, t_min=0.3, t_max=0.6, log='[GetAB]'):
  
     """
     ---------------------------------------------------------------------------------------------------------------------------------------
@@ -100,7 +102,7 @@ def PrepareAB(odom1, odom2, index_start=0, index_end=0, index_delta=(20,30,40,50
             k is in range(index_start, data_size-index_end-w, index_step)
             w is in index_delta
 
-            an (R,T) is valid if ||R-I|| > rotation_th (use 1-norm)
+            an (R,T) is valid if ||R-I|| > r_th (use 1-norm) and t_min < ||T|| < t_max (use 2-norm)
     ---------------------------------------------------------------------------------------------------------------------------------------
     """
 
@@ -141,7 +143,7 @@ def PrepareAB(odom1, odom2, index_start=0, index_end=0, index_delta=(20,30,40,50
                 TAP = np.matmul(RA1.T, np.array([[tx1[k]-tx1[k+w]],[ty1[k]-ty1[k+w]],[tz1[k]-tz1[k+w]]]))
                 TBP = np.matmul(RB1.T, np.array([[tx2[k]-tx2[k+w]],[ty2[k]-ty2[k+w]],[tz2[k]-tz2[k+w]]]))
 
-                if (np.linalg.norm(TAP)>=t_th) & (np.linalg.norm(TBP)>=t_th):
+                if (np.linalg.norm(TBP)>=t_min) & (np.linalg.norm(TBP)<=t_max):
 
                     RA = np.append(RA,RAP.reshape(3,3,1),axis=2)
                     RB = np.append(RB,RBP.reshape(3,3,1),axis=2)

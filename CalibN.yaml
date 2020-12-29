@@ -1,0 +1,17 @@
+
+Odom_file:
+- txt/00-0721-2-RSLodom.txt
+- txt/00-0721-2-RSModom.txt
+- txt/00-0721-2-RSRodom.txt
+
+Sensor_name:
+- LL
+- LM
+- LR
+
+Ts_max: 0.05
+DR_min: 1.2
+Dt_min: 0.3
+Dt_max: 8.0
+SVD_group_size: 800
+

@@ -1,0 +1,12 @@
+
+Odom_file:
+- txt/00-1229-1-CA-1.txt
+- txt/00-1229-1-VL-1.txt
+
+Ts_max: 0.05
+DR_min: 1
+Dt_min: 1
+Dt_max: 8
+SVD_group_size: 800
+Scale: 0.0
+

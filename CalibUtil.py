@@ -4,10 +4,12 @@ from scipy.spatial.transform import Rotation as Rot
 from scipy.optimize import minimize
 
 def SolveRGroup(RA, RB):
+
     """
-    Solve RA * RX = RX * RB
+    Solve a group of RA * RX = RX * RB
     return RX's rotvec
     """
+
     n = RA.shape[2]
     M = np.zeros((9*n,9),dtype=np.float64)
 
@@ -25,19 +27,24 @@ def SolveRGroup(RA, RB):
 
 def SolveR(RA, RB, group_size=1000, log='[SolveR]', name="RX"):
 
-    if RA.shape[2] < group_size:
-        print(log,"Must have",group_size,"data to calculate RX")
+    """
+    Solve all RA * RX = RX * RB
+    return RX's rotmatrix
+    """
+
+    gs = group_size if group_size!=0 else RA.shape[2]
+        
+    if RA.shape[2] < gs:
+        print(log,"Solve",name,"failed, you must have more than",gs,"data to solve it")
         return np.eye(3)
 
     vx = np.zeros(3)
-    mx = int(RA.shape[2]/group_size)
+    mx = int(RA.shape[2]/gs)
 
     for k in range(mx):
         print(log,"Calculate",name,"... [",k+1,"/",mx,"]",end='\n' if k==mx-1 else '\r')
-        # vx = vx + SolveRGroup(RA[:,:,k*group_size:k*group_size+group_size],
-        #                       RB[:,:,k*group_size:k*group_size+group_size]) / mx
-        vx = vx + SolveRGroup(RA[:,:,range(k,k+mx*group_size,mx)],
-                              RB[:,:,range(k,k+mx*group_size,mx)]) / mx
+        vx = vx + SolveRGroup(RA[:,:,range(k,k+mx*gs,mx)],
+                              RB[:,:,range(k,k+mx*gs,mx)]) / mx
 
     RotX = Rot.from_rotvec(vx)
     RX = RotX.as_matrix()
@@ -58,7 +65,8 @@ def SolveT(RA, RB, TA, TB, RX, scale=1, log='[SolveT]', name='TX'):
 
     n = RA.shape[2]
 
-    print(log,"Calculate",name,"...")
+    if log != '':
+        print(log,"Calculate",name,"...")
     
     if scale == 0:
 
@@ -82,15 +90,10 @@ def SolveT(RA, RB, TA, TB, RX, scale=1, log='[SolveT]', name='TX'):
             P[3*k:3*k+3,:]   = np.matmul(RX, TB[:,:,k]) - TA[:,:,k] * scale
 
         TXresult = np.linalg.lstsq(L,P,rcond=-1)
-
-    # print(log,"Single Values of L ->")
-    # print(TXresult[3],'\n')
-    # print(log,"TX / scale ->")
-    # print(TXresult[0],'\n')  
-    # print(log,"LS error ->")
-    # print(TXresult[1],'\n')
-
+        
     return TXresult[0]
+
+    
 
 def SolveT3nz(R1A, R1B, R2B, R2C, R3C, R3A, T1A, T1B, T2B, T2C, T3C, T3A, RX, RY, RZ, log=True):
 
