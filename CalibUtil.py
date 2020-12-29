@@ -23,41 +23,31 @@ def SolveRGroup(RA, RB):
 
     return Rot.from_matrix(RX).as_rotvec()
 
-def SolveR(RA, RB, group_size=1000, log=True, name="R"):
+def SolveR(RA, RB, group_size=1000, log='[SolveR]', name="RX"):
 
     if RA.shape[2] < group_size:
-        print("Must have",group_size,"data to calculate RX")
+        print(log,"Must have",group_size,"data to calculate RX")
         return np.eye(3)
 
     vx = np.zeros(3)
     mx = int(RA.shape[2]/group_size)
 
-    if log:
-        print("\n----------------------------------------\n")
-        print("Start Calculate RX ...")
-
     for k in range(mx):
-        vx = vx + SolveRGroup(RA[:,:,k*group_size:k*group_size+group_size],
-                              RB[:,:,k*group_size:k*group_size+group_size]) / mx
-        if log:
-            print(k+1,"/",mx)
+        print(log,"Calculate",name,"... [",k+1,"/",mx,"]",end='\n' if k==mx-1 else '\r')
+        # vx = vx + SolveRGroup(RA[:,:,k*group_size:k*group_size+group_size],
+        #                       RB[:,:,k*group_size:k*group_size+group_size]) / mx
+        vx = vx + SolveRGroup(RA[:,:,range(k,k+mx*group_size,mx)],
+                              RB[:,:,range(k,k+mx*group_size,mx)]) / mx
 
     RotX = Rot.from_rotvec(vx)
     RX = RotX.as_matrix()
-    AX = RotX.as_euler('zyx',degrees=True)
+    # AX = RotX.as_euler('zyx',degrees=True)
+    # print('AX ->')
+    # print(AX)
 
-    if(log):
-        
-        print("\n----------------------------------------\n")
-        print(name,"Result ->")
-        print(RX)
-        print("\nEuler Angle (zyx) ->")
-        print(AX)
-        print("\n----------------------------------------\n")
+    return RX   
 
-    return RX    
-
-def SolveT(RA, RB, TA, TB, RX, scale=1, ignore_z=False, log=True):
+def SolveT(RA, RB, TA, TB, RX, scale=1, log='[SolveT]', name='TX'):
 
     """
     Solve (RA - I) * TX + s * TA = RX * TB
@@ -67,6 +57,8 @@ def SolveT(RA, RB, TA, TB, RX, scale=1, ignore_z=False, log=True):
     """
 
     n = RA.shape[2]
+
+    print(log,"Calculate",name,"...")
     
     if scale == 0:
 
@@ -78,10 +70,7 @@ def SolveT(RA, RB, TA, TB, RX, scale=1, ignore_z=False, log=True):
             L[3*k:3*k+3,3]   = TA[:,:,k].reshape(3)
             P[3*k:3*k+3,:]   = np.matmul(RX, TB[:,:,k])
 
-        if ignore_z:
-            TXresult = np.linalg.lstsq(L[:,0:3],P,rcond=-1)
-        else:
-            TXresult = np.linalg.lstsq(L,P,rcond=-1)
+        TXresult = np.linalg.lstsq(L,P,rcond=-1)
 
     else:
         
@@ -92,22 +81,14 @@ def SolveT(RA, RB, TA, TB, RX, scale=1, ignore_z=False, log=True):
             L[3*k:3*k+3,0:3] = RA[:,:,k] - np.eye(3)
             P[3*k:3*k+3,:]   = np.matmul(RX, TB[:,:,k]) - TA[:,:,k] * scale
 
-        if ignore_z:
-            TXresult = np.linalg.lstsq(L[:,0:2],P,rcond=-1)
-        else:
-            TXresult = np.linalg.lstsq(L,P,rcond=-1)
+        TXresult = np.linalg.lstsq(L,P,rcond=-1)
 
-    if log:
-
-        print("\n----------------------------------------")
-        print("\nSingle Values of L ->")
-        print(TXresult[3])
-        print("\nTX / scale ->")
-        print(TXresult[0])  
-        print("\nLS error ->")
-        print(TXresult[1])
-        print("\n----------------------------------------")
-
+    # print(log,"Single Values of L ->")
+    # print(TXresult[3],'\n')
+    # print(log,"TX / scale ->")
+    # print(TXresult[0],'\n')  
+    # print(log,"LS error ->")
+    # print(TXresult[1],'\n')
 
     return TXresult[0]
 

@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as Rot 
 
-def ReadDataFromFile(file_name, file_type='ORB', time_stamp="real"):
+def ReadDataFromFile(file_name, file_type='ORB', time_stamp="real", log='[ReadData]'):
 
     """
     file_type: 'ORB' or 'ROS'
@@ -18,11 +18,11 @@ def ReadDataFromFile(file_name, file_type='ORB', time_stamp="real"):
     if time_stamp == 'delta':
         data[:,0] = data[:,0] - data[0,0]
 
-    print('data size / origin odometry:',data.shape[0])
+    print(log,'Read',data.shape[0],'data from',file_name)
 
     return data
 
-def TimestampMatch(odom1, odom2, time_th=0.05):
+def TimestampMatch(odom1, odom2, time_th=0.05, log='[TsMatch]'):
 
     """
     input:  odom1   (m x 8) = [ts1_1, tx1_1, ty1_1, tz1_1, rx1_1, ry1_1, rz1_1, rw1_1]
@@ -69,11 +69,11 @@ def TimestampMatch(odom1, odom2, time_th=0.05):
         else:
             j = j + 1
 
-    print('data size / after timestamp match:',odom1.shape[0]-1)
+    print(log,'Get',odom1.shape[0]-1,'data pairs after timestamp match')
 
     return odom1s[1:,:], odom2s[1:,:]
 
-def PrepareAB(odom1, odom2, index_start=0, index_end=0, index_delta=(20,30,40,50,70,100,130,160,240), index_step=1, r_th=1.2, t_th=0.3, log=False):
+def PrepareAB(odom1, odom2, index_start=0, index_end=0, index_delta=(20,30,40,50,70,100,130,160,200,240), index_step=1, r_th=1.2, t_th=0.3, log='[GetAB]'):
  
     """
     ---------------------------------------------------------------------------------------------------------------------------------------
@@ -148,19 +148,14 @@ def PrepareAB(odom1, odom2, index_start=0, index_end=0, index_delta=(20,30,40,50
                     TA = np.append(TA,TAP.reshape(3,1,1),axis=2)
                     TB = np.append(TB,TBP.reshape(3,1,1),axis=2)
 
-                if log:
+                # print('k=',k,'\tw=',w,'--------------------------\n')
+                # print('RA->\n',RAP)
+                # print('RB->\n',RBP)
+                # print('TA->\n',TAP)
+                # print('TB->\n',TBP)
+                # print('\n')
 
-                    print('k=',k,'\tw=',w,'--------------------------\n')
-                    print('RA->\n',RAP)
-                    print('RB->\n',RBP)
-                    print('TA->\n',TAP)
-                    print('TB->\n',TBP)
-                    print('\n')
-
-    print('data size / valid A and B:',RA.shape[2]-1)
-
-
-       
+    print(log,'Get',RA.shape[2]-1,'valid A-B pairs for calibration')
 
     return RA[:,:,1:],RB[:,:,1:],TA[:,:,1:],TB[:,:,1:]
 

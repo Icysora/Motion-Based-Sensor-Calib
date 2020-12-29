@@ -2,26 +2,35 @@
 import numpy as np
 import CalibDataProcessor
 import CalibUtil
-import matplotlib.pyplot as plt
+import yaml
 
-odom1 = CalibDataProcessor.ReadDataFromFile('txt/00-1216-VLodom.txt',file_type='ORB',time_stamp='real')
-odom2 = CalibDataProcessor.ReadDataFromFile('txt/00-1216-RSodom.txt',file_type='ORB',time_stamp='real')
+if __name__ == "__main__":
 
-# fig = plt.figure()
-# ax = fig.gca(projection='3d')
-# ax.plot(odom1[:,1],odom1[:,2],odom1[:,3],color='m')
-# ax.plot(odom2[:,1],odom2[:,2],odom2[:,3],color='b')
-# plt.show()
+    # Get Config Data
+    yaml.warnings({'YAMLLoadWarning':False})
+    yamlfile = open('Calib2.yaml','r',encoding='utf-8')
+    yamlcont = yamlfile.read()
+    yamldata = yaml.load(yamlcont)
+    yamlfile.close()
 
-odom1s, odom2s = CalibDataProcessor.TimestampMatch(odom1, odom2, time_th=0.05)
-R1A, R1B, T1A, T1B = CalibDataProcessor.PrepareAB(odom1s, odom2s, r_th=1.4, t_th=0.1, log=False)
-RX = CalibUtil.SolveR(R1A,R1B,group_size=800,name="R")
+    # Get Data
+    odom1 = CalibDataProcessor.ReadDataFromFile(yamldata['Odom_file'][0], log='[1/5]')
+    odom2 = CalibDataProcessor.ReadDataFromFile(yamldata['Odom_file'][1], log='[1/5]')
+    odom1s, odom2s = CalibDataProcessor.TimestampMatch(odom1, odom2,
+                     time_th=yamldata['Ts_th'], log='[2/5]')
+    RA, RB, TA, TB = CalibDataProcessor.PrepareAB(odom1s, odom2s,
+                     r_th=yamldata['DR_th'], t_th=yamldata['Dt_th'], log='[3/5]')
 
+    # Calibration
+    RX = CalibUtil.SolveR(RA, RB, group_size=yamldata['SVD_group_size'], log='[4/5]')
+    TX = CalibUtil.SolveT(RA, RB, TA, TB, RX, scale=yamldata['Scale'], log='[5/5]')
 
-TX = CalibUtil.SolveT(R1A, R1B, T1A, T1B, RX, ignore_z=False)
-
-
-
+    # Show Result
+    print('\n--------------------\n')
+    print('RX ->')
+    print(RX)
+    print('TX ->')
+    print(TX)
 
 
 

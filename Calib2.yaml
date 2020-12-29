@@ -1,0 +1,11 @@
+
+Odom_file:
+- txt/00-1216-RSodom.txt
+- txt/00-1216-VLodom.txt
+
+Ts_th: 0.05
+DR_th: 1.4
+Dt_th: 0.1
+SVD_group_size: 800
+Scale: 1.0
+
