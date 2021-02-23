@@ -20,7 +20,7 @@ if __name__ == "__main__":
     odom1s, odom2s = CalibDataProcessor.TimestampMatch(odom1, odom2,
                      time_th=yamldata['Ts_max'], log='[3/6]')
     RA, RB, TA, TB = CalibDataProcessor.PrepareAB(odom1s, odom2s,
-                     index_delta=range(5,50,1),
+                     #index_delta=range(2,50,1),
                      r_th=yamldata['DR_min'], t_min=yamldata['Dt_min'], t_max=yamldata['Dt_max'], log='[4/6]')
 
     # Calibration

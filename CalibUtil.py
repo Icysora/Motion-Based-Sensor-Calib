@@ -3,11 +3,12 @@ import numpy as np
 from scipy.spatial.transform import Rotation as Rot 
 from scipy.optimize import minimize
 
+
 def SolveRGroup(RA, RB):
 
     """
     Solve a group of RA * RX = RX * RB
-    return RX's rotvec
+    return RX's quat
     """
 
     n = RA.shape[2]
@@ -42,7 +43,8 @@ def SolveR(RA, RB, group_size=1000, log='[SolveR]', name="RX"):
     mx = int(RA.shape[2]/gs)
 
     for k in range(mx):
-        print(log,"Calculate",name,"... [",k+1,"/",mx,"]",end='\n' if k==mx-1 else '\r')
+        if log != '':
+            print(log,"Calculate",name,"... [",k+1,"/",mx,"]",end='\n' if k==mx-1 else '\r')
         vx = vx + SolveRGroup(RA[:,:,range(k,k+mx*gs,mx)],
                               RB[:,:,range(k,k+mx*gs,mx)]) / mx
 

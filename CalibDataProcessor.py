@@ -143,7 +143,7 @@ def PrepareAB(odom1, odom2, index_start=0, index_end=0,
                 TAP = np.matmul(RA1.T, np.array([[tx1[k]-tx1[k+w]],[ty1[k]-ty1[k+w]],[tz1[k]-tz1[k+w]]]))
                 TBP = np.matmul(RB1.T, np.array([[tx2[k]-tx2[k+w]],[ty2[k]-ty2[k+w]],[tz2[k]-tz2[k+w]]]))
 
-                if (np.linalg.norm(TBP)>=t_min) & (np.linalg.norm(TBP)<=t_max):
+                if (np.linalg.norm(TAP)>=t_min) & (np.linalg.norm(TAP)<=t_max) &(np.linalg.norm(TBP)>=t_min) & (np.linalg.norm(TBP)<=t_max):
 
                     RA = np.append(RA,RAP.reshape(3,3,1),axis=2)
                     RB = np.append(RB,RBP.reshape(3,3,1),axis=2)
